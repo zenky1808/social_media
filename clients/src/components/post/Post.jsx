@@ -1,28 +1,44 @@
+
 import './post.css'
 import { MoreVert, ThumbUpAlt, ChatBubbleOutline, Share } from '@material-ui/icons'
-import {Users} from '../../dumdata'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { format } from 'timeago.js'
+
 
 export default function Post({post}) {
+    const PF = process.env.REACT_APP_PUBLIC_FOLDER
 
-    const userName = Users.filter(item => item.id === post.userId)[0].username
-    const userImg = Users.filter(item => item.id === post.userId)[0].profilePicture
-    const [like, setLike] = useState(post.like)
+    const [like, setLike] = useState(post.likes.length)
     const [isLiked, setIsLiked] = useState(false)
-    const [isActive, setActive] = useState(false);
+    const [isActive, setActive] = useState(false)
+    const [user, setUser] = useState({})
+
     const likeHandler = () => {
         setLike(isLiked ? like - 1 : like + 1 )
         setIsLiked(!isLiked)
         setActive(!isActive);
     }
+
+    useEffect( () => {
+        const fetchUser = async () => {
+            const res = await axios.get(`user/${post.userId}`)
+            setUser(res.data)
+        }
+        fetchUser()
+        
+    }, [post.userId])
+
     return (
         <div className="post">
             <div className="postWrapper">
                 <div className="postTop">
                     <div className="postTopLeft">
-                        <img src={userImg} alt="" className="postProfileImg" />
-                        <span className="postUserName">{userName}</span>
-                        <div className="postDate">{post.date}</div>
+                        <img src={user.profilePicture || PF+"person/noAvatar.png"} alt="" className="postProfileImg" />
+                        <div className="potsProfile">
+                            <span className="postUserName">{user.userName}</span>
+                            <div className="postDate">{format(post.createdAt)}</div>
+                        </div>
                     </div>
                     <div className="postTopRight">
                         <MoreVert className="postTopRightIcon"/>
@@ -30,12 +46,12 @@ export default function Post({post}) {
                 </div>
                 <div className="postCenter">
                     <span className="postText">{post?.desc}</span>
-                    <img src={post.photo} alt="" className="postImg" />
+                    <img src={PF+post.img} alt="" className="postImg" />
                 </div>
                 {/* <hr /> */}
                 <div className="postBottom">
                     <div className="postBottomLeft">
-                        <img src="assets/like.png" alt="" className="likeIcon" />
+                        <img src={`${PF}like.png`} alt="" className="likeIcon" />
                         {/* <img src="assets/heart.png" alt="" className="likeIcon" /> */}
                         <span className="postLikeCounter">{like} people like it</span>
                     </div>
@@ -62,7 +78,7 @@ export default function Post({post}) {
                 </div>
                 <hr className="postHr"/>
                 <div className="postInputComments">
-                    <img src="assets/person/avata.jpg" alt="" className="postInputCommentProfileImg" />
+                    <img src={`${PF}person/avata.jpg`} alt="" className="postInputCommentProfileImg" />
                     <input type="text" className="postInputComment" placeholder="Write a comment..." />
                 </div>
             </div>

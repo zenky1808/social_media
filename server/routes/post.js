@@ -6,7 +6,7 @@ const post = require('../controllers/post');
 // Create a post
 route.post('/', post.createPost);
 // Get timeline a post
-route.get('/timeline', post.getTimeline);
+route.get('/timeline/:userId', post.getTimeline);
 // Update a post
 route.put('/:id', post.updatePost);
 // Delete a post
